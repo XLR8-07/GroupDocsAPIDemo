@@ -1,0 +1,6 @@
+@GroupDocsDemoAPI_HostAddress = http://localhost:5283
+
+GET {{GroupDocsDemoAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

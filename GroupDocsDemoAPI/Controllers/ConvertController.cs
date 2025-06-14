@@ -13,6 +13,18 @@ public class ConvertController: ControllerBase
     // private readonly ConversionService conversionService;
     private readonly FileUploadService fileUploadService = new FileUploadService();
 
+    [HttpPost("info")]
+    public async Task<IActionResult> GetInfo([FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        
+        using (Converter converter = new Converter(uploadedRelativePath))
+        {
+            IDocumentInfo info = converter.GetDocumentInfo();
+
+            return Ok(info);
+        }
+    }
     [HttpPost("formats")]
     public async Task<IActionResult> getConversionTypes([FromForm] IFormFile file)
     {
@@ -21,7 +33,6 @@ public class ConvertController: ControllerBase
         using (Converter converter = new Converter(uploadedRelativePath))
         {
             PossibleConversions possibleConversions = converter.GetPossibleConversions();
-            Console.WriteLine("The source document is of type {0} and could be converted to:", possibleConversions.Source.Extension);
             return Ok(possibleConversions.All);
         }
     }

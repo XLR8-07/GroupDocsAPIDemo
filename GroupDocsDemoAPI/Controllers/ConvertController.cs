@@ -1,50 +1,39 @@
 using GroupDocs.Conversion;
 using Microsoft.AspNetCore.Mvc;
 using GroupDocs.Conversion.Options.Convert;
+using GroupDocsDemoAPI.Services;
 
 namespace GroupDocsDemoAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class ConvertController: ControllerBase
-{
-    [HttpPost("to/{type}")]
-    public IActionResult ConvertToFormat([FromRoute] string type, [FromForm] IFormFile file)
+{   
+    // private readonly ConversionService conversionService;
+    private readonly FileUploadService fileUploadService = new FileUploadService();
+    
+    [HttpPost("word/to/{type}")]
+    public async Task<IActionResult> WordConvertToFormat([FromRoute] string type, [FromForm] IFormFile file)
     {
-        if (file == null || file.Length == 0)
-            return BadRequest("File is required.");
-
-        if (string.IsNullOrWhiteSpace(type))
-            return BadRequest("Target format type is required (e.g. pdf, docx, html).");
-
-        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-        Directory.CreateDirectory(uploadsPath);
-
-        var inputPath = Path.Combine(uploadsPath, file.FileName);
-        using (var stream = new FileStream(inputPath, FileMode.Create))
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        string outputPath = fileUploadService.getFileOutputPath(file.FileName, type);
+        
+        using (var converter = new Converter(uploadedRelativePath))
         {
-            file.CopyTo(stream);
-        }
-
-        var outputFileName = Path.GetFileNameWithoutExtension(file.FileName) + $".{type.ToLower()}";
-        var outputPath = Path.Combine(uploadsPath, outputFileName);
-
-        try
-        {
-            using (var converter = new Converter(inputPath))
-            {
-                var saveOptions = GetConvertOptions(type);
-                converter.Convert(outputPath , saveOptions);
-            }
-        }
-        catch
-        {
-            return BadRequest("Unsupported format or conversion error.");
+            var saveOptions = GetConvertOptions(type);
+            Console.WriteLine($"Converting {type} to {outputPath}");
+            converter.Convert(outputPath , saveOptions);
         }
 
         var resultBytes = System.IO.File.ReadAllBytes(outputPath);
-        return File(resultBytes, "application/octet-stream", outputFileName);
+        return File(resultBytes, "application/octet-stream", outputPath);
     }
+
+    // [HttpPost("pdf/to/{type}")]
+    // public IActionResult PDFConvertToFormat([FromRoute] string type, [FromForm] IFormFile file)
+    // {
+    //     
+    // }
     
     private static ConvertOptions GetConvertOptions(string format)
     {

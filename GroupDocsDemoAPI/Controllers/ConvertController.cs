@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using GroupDocs.Conversion;
+using GroupDocs.Conversion.Caching;
 using GroupDocs.Conversion.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
 using GroupDocsDemoAPI.Services;
 
 namespace GroupDocsDemoAPI.Controllers;
@@ -10,7 +13,6 @@ namespace GroupDocsDemoAPI.Controllers;
 [Route("api/[controller]")]
 public class ConvertController: ControllerBase
 {   
-    // private readonly ConversionService conversionService;
     private readonly FileUploadService fileUploadService = new FileUploadService();
 
     [HttpPost("info")]
@@ -67,6 +69,29 @@ public class ConvertController: ControllerBase
 
         var resultBytes = System.IO.File.ReadAllBytes(outputPath);
         return File(resultBytes, "application/octet-stream", outputPath);
+    }
+    
+    [HttpPost("excel/to/{type}")]
+    public async  Task<IActionResult> ExcelConvertToFormat([FromRoute] string type, [FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        string outputPath = fileUploadService.getFileOutputPath(file.FileName, type);
+        FileCache cache = new FileCache("wwwroot");
+
+        Func<ConverterSettings> settingsFactory = () => new ConverterSettings
+        {
+            Cache = cache
+        };
+        
+        using (var converter = new Converter(uploadedRelativePath , settingsFactory))
+        {
+            var saveOptions = GetConvertOptions(type);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            converter.Convert(outputPath, saveOptions);
+            stopwatch.Stop();
+            return Ok($"Conversion completed in {stopwatch.ElapsedMilliseconds}ms");    
+        }
+        
     }
     
     private static ConvertOptions GetConvertOptions(string format)

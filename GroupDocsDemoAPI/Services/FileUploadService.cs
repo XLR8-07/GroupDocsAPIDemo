@@ -4,6 +4,7 @@ public class FileUploadService
 {
     private readonly string _rootUploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
     private readonly string _rootOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "output");
+    private readonly string _cachePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "cache");
 
     public async Task<string> UploadFile(IFormFile file)
     {
@@ -65,5 +66,10 @@ public class FileUploadService
         string relativePath = fullPath[fullPath.IndexOf("wwwroot")!..].Replace("\\", "/");
         relativePath = Path.ChangeExtension(relativePath, fileExtension);
         return relativePath;
+    }
+
+    public string getCacheFilePath()
+    {
+        return _cachePath;
     }
 }

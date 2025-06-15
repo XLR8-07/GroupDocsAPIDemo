@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 });
 
 // Register your services here
-builder.Services.AddScoped<ConversionService>();
+// builder.Services.AddScoped<ConversionService>();
 
 var app = builder.Build();
 

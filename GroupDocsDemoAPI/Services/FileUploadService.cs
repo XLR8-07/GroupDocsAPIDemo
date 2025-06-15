@@ -10,8 +10,6 @@ public class FileUploadService
         Directory.CreateDirectory(_rootUploadPath);
         
         var fileExtension = Path.GetExtension(file.FileName)?.TrimStart('.').ToLower();
-        // if (string.IsNullOrWhiteSpace(fileExtension))
-        //     return BadRequest("File has no valid extension.");
         
         var typeDir = Path.Combine(_rootUploadPath, fileExtension);
         Directory.CreateDirectory(typeDir);
@@ -50,16 +48,6 @@ public class FileUploadService
         foreach (char c in Path.GetInvalidFileNameChars())
             fileName = fileName.Replace(c, '_');
         return fileName;
-    }
-
-    public string getRootUploadPath()
-    {
-        return _rootUploadPath;
-    }
-
-    public string getRootOutputPath()
-    {
-        return _rootOutputPath;
     }
 
     public string getFileOutputPath(string fileName, string fileExtension)

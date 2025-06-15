@@ -46,7 +46,6 @@ public class ConvertController: ControllerBase
         using (var converter = new Converter(uploadedRelativePath))
         {
             var saveOptions = GetConvertOptions(type);
-            Console.WriteLine($"Converting {type} to {outputPath}");
             converter.Convert(outputPath , saveOptions);
         }
 
@@ -63,7 +62,6 @@ public class ConvertController: ControllerBase
         using (var converter = new Converter(uploadedRelativePath))
         {
             var saveOptions = GetConvertOptions(type);
-            Console.WriteLine($"Converting {type} to {outputPath}");
             converter.Convert(outputPath , saveOptions);
         }
 

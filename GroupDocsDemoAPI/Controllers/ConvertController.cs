@@ -44,10 +44,16 @@ public class ConvertController: ControllerBase
     {
         string uploadedRelativePath = await fileUploadService.UploadFile(file);
         string outputPath = fileUploadService.getFileOutputPath(file.FileName, type);
-        
-        using (var converter = new Converter(uploadedRelativePath))
+
+        Func<LoadContext, LoadOptions> getLoadOptions = loadContext => new WordProcessingLoadOptions
         {
-            var saveOptions = GetConvertOptions(type);
+            Password = "abc123"
+        };
+        
+        using (var converter = new Converter(uploadedRelativePath , getLoadOptions))
+        {
+            PdfConvertOptions saveOptions = new PdfConvertOptions();
+            saveOptions.Password = "abc123";
             converter.Convert(outputPath , saveOptions);
         }
 

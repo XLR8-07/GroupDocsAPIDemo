@@ -134,4 +134,29 @@ public class SignatureController: ControllerBase
             
         }
     }
+    
+    [HttpPost("deleteTextSignature")]
+    public async Task<IActionResult> DeleteTextSignature()
+    {
+        
+        using (Signature signature = new Signature("TextSigned.pdf"))
+        {
+            TextSearchOptions options = new TextSearchOptions();
+            
+            List<TextSignature> signatures = signature.Search<TextSignature>(options);
+
+            if (signatures.Count > 0)
+            {
+                TextSignature textSignature = signatures[0];
+                bool result = signature.Delete(textSignature);
+                
+                if (result)
+                {
+                    return Ok("Text Signature Removed");
+                }
+                return BadRequest("Text Signature Not Found");
+            }
+            return BadRequest("No Signature Found");
+        }
+    }
 }

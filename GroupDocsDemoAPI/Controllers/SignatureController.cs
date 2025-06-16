@@ -73,4 +73,65 @@ public class SignatureController: ControllerBase
             return Ok("Signed Successfully, Check BarcodeSigned.pdf");
         }
     }
+    
+    [HttpPost("addQRCodeSignature")]
+    public async Task<IActionResult> AddQRCodeSignature([FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        
+        using (Signature signature = new Signature(uploadedRelativePath))
+        {
+            QrCodeSignOptions options = new QrCodeSignOptions("iBAS++")
+            {
+                EncodeType = QrCodeTypes.QR,
+                Left = 100,
+                Top = 100
+            };
+            signature.Sign("QRCodeSigned.pdf", options);
+            return Ok("Signed Successfully, Check QRCodeSigned.pdf");
+        }
+    }
+    
+    [HttpPost("addDigitalSignature")]
+    public async Task<IActionResult> AddDigitalSignature([FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        
+        using (Signature signature = new Signature(uploadedRelativePath))
+        {
+            DigitalSignOptions options = new DigitalSignOptions("self-signed-cert.pfx")
+            {
+                Left = 100,
+                Top = 100,
+                Password = "abc123"
+            };
+            signature.Sign("DigitallySigned.pdf", options);
+            return Ok("Signed Successfully, Check DigitallySigned.pdf");
+        }
+    }
+    
+    [HttpPost("verifySignature")]
+    public async Task<IActionResult> VerifyDigitalSignature([FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        
+        using (Signature signature = new Signature(uploadedRelativePath))
+        {
+            DigitalVerifyOptions options = new DigitalVerifyOptions("self-signed-cert.pfx")
+            {
+                Password = "abc123"
+            };
+            VerificationResult result = signature.Verify(options);
+            Console.WriteLine("Verification Result: " + result);
+            if (result.IsValid)
+            {
+                return Ok("Signature Verified");
+            }
+            else
+            {
+                return BadRequest("Signature Not Matched");
+            }
+            
+        }
+    }
 }

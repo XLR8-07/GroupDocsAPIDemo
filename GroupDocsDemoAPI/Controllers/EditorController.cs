@@ -1,9 +1,9 @@
 using GroupDocs.Editor;
 using GroupDocs.Editor.Formats;
+using GroupDocs.Editor.Metadata;
 using GroupDocs.Editor.Options;
 using GroupDocsDemoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace GroupDocsDemoAPI.Controllers;
 
@@ -39,6 +39,16 @@ public class EditorController : ControllerBase
         editor.Save(afterEdit, "EditedDoc.docx" , saveOptions);
         editor.Save(afterEdit,"EditedDoc.pdf", pdfSaveOptions);
         return Ok("Edited File Saved Successfully");
+    }
+
+    [HttpPost("getDocumentMetadata")]
+    public async Task<IActionResult> GetDocumentMetadata([FromForm] IFormFile file)
+    {
+        string uploadedRelativePath = await fileUploadService.UploadFile(file);
+        
+        Editor editor = new Editor(uploadedRelativePath);
+        IDocumentInfo infoWordDoc = editor.GetDocumentInfo(null);
+        return Ok(infoWordDoc);
     }
     
 }

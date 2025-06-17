@@ -18,12 +18,25 @@ public class RedactionController : ControllerBase
         using (Redactor redactor = new Redactor(uploadFilePath))
         {
             RedactorChangeLog result =
-                redactor.Apply(new ExactPhraseRedaction("QUICK BROWN FOX", new ReplacementOptions("[Sensitive]")));
+                redactor.Apply(new ExactPhraseRedaction("QUICK BROWN FOX", true, new ReplacementOptions("[Sensitive]")));
             if (result.Status != RedactionStatus.Failed)
             {
                 redactor.Save();
             }
             return Ok(result.Status);
         }
+    }
+
+    [HttpPost("hideMetadata")]
+    public async Task<IActionResult> HideMetadata([FromForm] IFormFile file)
+    {
+        string uploadFilePath = await fileUploadService.UploadFile(file);
+        using (Redactor redactor = new Redactor(uploadFilePath))
+        {
+            redactor.Apply(new EraseMetadataRedaction(MetadataFilters.All));
+            redactor.Save();
+            return Ok();
+        }
+        
     }
 }

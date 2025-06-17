@@ -1,4 +1,5 @@
 using GroupDocs.Merger;
+using GroupDocs.Merger.Domain.Options;
 using GroupDocsDemoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,17 +11,21 @@ public class MergerController : ControllerBase
     private readonly FileUploadService fileUploadService = new FileUploadService();
     
     [HttpPost("merge")]
-    public async Task<IActionResult> Merge([FromForm] IFormFile file1, [FromForm] IFormFile file2)
+    public async Task<IActionResult> Merge()
     {
-        string file1Path = await fileUploadService.UploadFile(file1);
-        string file2Path = await fileUploadService.UploadFile(file2);
+        string filePath = @"wwwroot/uploads/docx/8bea534f51ef00e35903940fc32aadfc.docx";
+        string filePath2 = @"wwwroot/uploads/docx/DemoDoc.docx";
+        
+        string filePathOut = @"wwwroot/output/pdf/Merged_Test5.docx";
 
-        using (Merger merger = new Merger(file1Path))
+        PdfJoinOptions joinOptions = new PdfJoinOptions();
+
+        using (Merger merger = new Merger(filePath))
         {
-            merger.Join(file2Path);
-            merger.Save("TestPDF.pdf");
-            return Ok("File Merged Successfully");
+            merger.Join(filePath2, joinOptions);
+            merger.Save(filePathOut);
         }
+        return Ok();
     }
     
 }
